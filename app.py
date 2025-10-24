@@ -8,6 +8,7 @@ from telethon.errors import SessionPasswordNeededError
 from telethon.sessions.memory import MemorySession
 from telethon.sessions import StringSession
 from functools import wraps
+import imageio_ffmpeg as ffmpeg
 
 app = Quart(__name__)
 app.secret_key = os.getenv("APP_SECRET", "supersecret")
@@ -138,11 +139,14 @@ async def send_round():
     await video.save(temp)
     result = temp.replace(".mp4", "_round.mp4")
 
-    subprocess.run([
-        "ffmpeg", "-y", "-i", temp,
+    cmd = [
+        ffmpeg.get_ffmpeg_exe(),  # path ke ffmpeg binari
+        "-y", "-i", temp,
         "-vf", "crop='min(iw,ih)':'min(iw,ih)',scale=640:640,setsar=1:1",
         "-c:a", "copy", result
-    ], check=True)
+    ]
+
+    subprocess.run(cmd, check=True)
 
     await client.send_file(to, result, video_note=True)
     os.remove(temp)
@@ -190,11 +194,14 @@ async def setup_auto_round(client):
         path = await event.download_media()
         out = path.replace(".mp4", "_round.mp4")
 
-        subprocess.run([
-            "ffmpeg", "-y", "-i", path,
+        cmd = [
+            ffmpeg.get_ffmpeg_exe(),  # path ke ffmpeg binari
+            "-y", "-i", temp,
             "-vf", "crop='min(iw,ih)':'min(iw,ih)',scale=640:640,setsar=1:1",
             "-c:a", "copy", out
-        ], check=True)
+        ]
+
+        subprocess.run(cmd, check=True)
 
         await client.send_file(event.chat_id, out, video_note=True)
         os.remove(path)
