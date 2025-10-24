@@ -2,5 +2,3 @@ quart
 telethon
 ffmpeg-python
 asyncpg
-telethon-session-sqlalchemy 
-sqlalchemy
