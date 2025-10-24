@@ -15,6 +15,7 @@ app.secret_key = os.getenv("APP_SECRET", "supersecret")
 
 WEB_PASSWORD = os.getenv("WEB_PASSWORD", "1234")
 DATABASE_URL = os.getenv("DATABASE_URL")
+PING_INTERVAL = int(os.getenv("PING_INTERVAL", 300))  # 5 menit
 
 clients = {}
 db_pool = None
@@ -265,6 +266,20 @@ async def delete_session_from_db(phone):
         await conn.execute("DELETE FROM telethon_sessions WHERE phone=$1", phone)
     print(f"[DB] Session deleted for {phone}")
 
+# ===== AUTO PING =====
+async def auto_ping():
+    """Supaya Railway container tetap hidup"""
+    while True:
+        try:
+            url = os.getenv("APP_URL")  # set APP_URL di Railway ke URL aplikasi
+            if url:
+                async with aiohttp.ClientSession() as session_http:
+                    async with session_http.get(url) as resp:
+                        print(f"[Ping] Status: {resp.status}")
+        except Exception as e:
+            print(f"[Ping Error] {e}")
+        await asyncio.sleep(PING_INTERVAL)
+
 # ===== STARTUP DB =====
 @app.before_serving
 async def startup():
@@ -279,6 +294,7 @@ async def startup():
         );
         """)
     print("[DB] Connected and table ready")
+    asyncio.create_task(auto_ping())
 
 if __name__ == "__main__":
     asyncio.run(app.run(host="0.0.0.0", port=int(os.getenv("PORT", 8080))))
