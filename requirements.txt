@@ -1,5 +1,6 @@
 quart
 telethon
-gunicorn
-hypercorn
 ffmpeg-python
+asyncpg
+telethon-session-sqlalchemy 
+sqlalchemy
