@@ -196,7 +196,7 @@ async def setup_auto_round(client):
 
         cmd = [
             ffmpeg.get_ffmpeg_exe(),  # path ke ffmpeg binari
-            "-y", "-i", temp,
+            "-y", "-i", path,
             "-vf", "crop='min(iw,ih)':'min(iw,ih)',scale=640:640,setsar=1:1",
             "-c:a", "copy", out
         ]
