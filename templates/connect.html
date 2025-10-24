@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Telegram Connect</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    body {
+      background: #f4f6fb;
+      font-family: "Poppins", sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 420px;
+      background: #fff;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      border-radius: 20px;
+      padding: 25px;
+      text-align: center;
+      animation: fadeIn 0.6s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      margin: 6px 0;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      transition: 0.2s;
+      font-size: 15px;
+    }
+
+    input:focus {
+      border-color: #0066ff;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+    }
+
+    button {
+      width: 100%;
+      padding: 10px 0;
+      border: none;
+      border-radius: 10px;
+      background: #0066ff;
+      color: white;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin-top: 5px;
+    }
+
+    button:hover {
+      background: #004ecc;
+    }
+
+    .hidden { display: none; }
+
+    .status-box {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #333;
+      background: #f1f4ff;
+      border-radius: 8px;
+      padding: 10px;
+      min-height: 24px;
+      word-wrap: break-word;
+    }
+
+    .lock-btn {
+      background: #ff4747;
+    }
+    .lock-btn:hover {
+      background: #cc3a3a;
+    }
+
+    .account-list {
+      text-align: left;
+      margin-top: 15px;
+      background: #f8f8f8;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .account-item {
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .account-item:last-child { border-bottom: none; }
+
+    .disconnect-mini {
+      background: #e53e3e;
+      color: #fff;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🤖 Telegram Connect</h2>
+
+    <div id="connect_box">
+      <input id="api_id" placeholder="API ID">
+      <input id="api_hash" placeholder="API Hash">
+      <input id="phone" placeholder="+62...">
+      <button onclick="connect()">Connect</button>
+    </div>
+
+    <div id="otp_box" class="hidden">
+      <input id="code" placeholder="OTP code">
+      <button onclick="verify()">Verify</button>
+    </div>
+
+    <div id="pass_box" class="hidden">
+      <input id="password" placeholder="Telegram Password">
+      <button onclick="sendPass()">Send Password</button>
+    </div>
+
+    <div id="send_box" class="hidden">
+      <input id="to" placeholder="Recipient username / chat ID">
+      <input type="file" id="video">
+      <button onclick="sendRound()">Send Round Video</button>
+      <button onclick="disconnect()">Disconnect</button>
+    </div>
+
+    <a href="/logout"><button class="lock-btn">🔒 Lock</button></a>
+
+    <div id="status" class="status-box">Status: waiting...</div>
+
+    <div class="account-list" id="account_list"></div>
+  </div>
+
+  <script>
+    const delay = ms => new Promise(r => setTimeout(r, ms));
+
+    async function connect() {
+      let form = new FormData();
+      form.append("api_id", api_id.value);
+      form.append("api_hash", api_hash.value);
+      form.append("phone", phone.value);
+      setStatus("Connecting...");
+      let res = await fetch("/api/connect", { method: "POST", body: form });
+      let data = await res.json();
+      setStatus(data.status);
+      if (data.status === "otp_required") otp_box.classList.remove("hidden");
+      if (data.status === "connected") send_box.classList.remove("hidden");
+      await loadAccounts();
+    }
+
+    async function verify() {
+      let form = new FormData();
+      form.append("phone", phone.value);
+      form.append("code", code.value);
+      setStatus("Verifying...");
+      let res = await fetch("/api/verify", { method: "POST", body: form });
+      let data = await res.json();
+      setStatus(data.status);
+      if (data.status === "password_required") pass_box.classList.remove("hidden");
+      if (data.status === "connected") send_box.classList.remove("hidden");
+      await loadAccounts();
+    }
+
+    async function sendPass() {
+      let form = new FormData();
+      form.append("phone", phone.value);
+      form.append("password", password.value);
+      setStatus("Sending password...");
+      let res = await fetch("/api/password", { method: "POST", body: form });
+      let data = await res.json();
+      setStatus(data.status);
+      if (data.status === "connected") send_box.classList.remove("hidden");
+      await loadAccounts();
+    }
+
+    async function sendRound() {
+      let form = new FormData();
+      form.append("phone", phone.value);
+      form.append("to", to.value);
+      form.append("video", video.files[0]);
+      setStatus("Uploading...");
+      let res = await fetch("/api/send_round", { method: "POST", body: form });
+      let data = await res.json();
+      setStatus(data.status);
+    }
+
+    async function disconnect(phoneParam) {
+      const phoneToUse = phoneParam || phone.value;
+      let form = new FormData();
+      form.append("phone", phoneToUse);
+      setStatus("Disconnecting...");
+      let res = await fetch("/api/disconnect", { method: "POST", body: form });
+      let data = await res.json();
+      setStatus(data.status);
+      await delay(1000);
+      await loadAccounts();
+    }
+
+    async function loadAccounts() {
+      let res = await fetch("/api/status");
+      let accounts = await res.json();
+      const list = document.getElementById("account_list");
+      list.innerHTML = "<b>Active Sessions:</b><br>";
+      if (!accounts.length) return list.innerHTML += "<i>No active account.</i>";
+      accounts.forEach(acc => {
+        list.innerHTML += `
+          <div class="account-item">
+            <span>📱 ${acc.username || acc.phone}</span>
+            <button class="disconnect-mini" onclick="disconnect('${acc.phone}')">Disconnect</button>
+          </div>`;
+      });
+    }
+
+    function setStatus(text) {
+      status.innerText = "Status: " + text;
+    }
+
+    window.onload = loadAccounts;
+  </script>
+</body>
+</html>

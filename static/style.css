@@ -1,0 +1,149 @@
+/* ====== Global Styles ====== */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap");
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #f4f6fb;
+  font-family: "Poppins", sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+/* ====== Containers & Cards ====== */
+.container {
+  width: 100%;
+  max-width: 420px;
+  padding: 20px;
+}
+
+.card {
+  background: #fff;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
+  padding: 30px 25px;
+  text-align: center;
+  animation: fadeIn 0.6s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ====== Headings ====== */
+h2 {
+  color: #333;
+  margin-bottom: 15px;
+}
+
+/* ====== Inputs ====== */
+input {
+  width: 100%;
+  padding: 10px 12px;
+  margin: 6px 0;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  transition: 0.2s;
+  font-size: 15px;
+}
+
+input:focus {
+  border-color: #0066ff;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+}
+
+/* ====== Buttons ====== */
+button {
+  width: 100%;
+  padding: 10px 0;
+  border: none;
+  border-radius: 10px;
+  background: #0066ff;
+  color: white;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.3s;
+  margin-top: 5px;
+}
+
+button:hover {
+  background: #004ecc;
+}
+
+/* ====== Alert / Status ====== */
+.alert {
+  background: #ffefef;
+  color: #c0392b;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+/* ====== Status Box (connect.html) ====== */
+.status-box {
+  margin-top: 15px;
+  font-size: 14px;
+  color: #333;
+  background: #f1f4ff;
+  border-radius: 8px;
+  padding: 10px;
+  min-height: 24px;
+  word-wrap: break-word;
+}
+
+/* ====== Account List ====== */
+.account-list {
+  text-align: left;
+  margin-top: 15px;
+  background: #f8f8f8;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.account-item {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.account-item:last-child {
+  border-bottom: none;
+}
+
+.disconnect-mini {
+  background: #e53e3e;
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.disconnect-mini:hover {
+  background: #c53030;
+}
+
+/* ====== Lock Button ====== */
+.lock-btn {
+  background: #ff4747;
+}
+
+.lock-btn:hover {
+  background: #cc3a3a;
+}
+
+/* ====== Hidden Utility ====== */
+.hidden {
+  display: none;
+}
